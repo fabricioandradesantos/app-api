@@ -4,11 +4,11 @@ namespace App\Http\Controllers\API;
 
 use App\Models\Lot;
 use App\Models\User;
-use App\Models\SaleType;
 use App\Models\LotSaleType;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\API\BaseController;
 
@@ -60,12 +60,12 @@ class LotController extends BaseController
 
             $lot = Lot::create($inputs);
 
-            //if ($request->hasFile('images')) {
+            if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $upload = $image->store('lots', 'public');
                     $lot->images()->create(['filename' => $upload]);
                 }
-           // }            
+            }
 
             if (isset($request->sale_types)) {
 
@@ -111,9 +111,22 @@ class LotController extends BaseController
 
             $lot->fill($inputs)->save();
 
+            $deletedImages = $lot->images()->pluck('filename')->toArray();
+            $lot->images()->delete();
+
+            // Excluir as imagens da pasta storage 
+            foreach ($deletedImages as $imagePath) {
+                Storage::disk('public')->delete($imagePath);
+            }
+
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $upload = $image->store('lots', 'public');
+                    $lot->images()->create(['filename' => $upload]);
+                }
+            }
 
             $lot->lotSaleType()->delete();
-            
             if (isset($request->sale_types)) {
 
                 foreach ($request->sale_types as $key => $mySaleType) {
@@ -131,6 +144,31 @@ class LotController extends BaseController
         });
 
         return $this->sendResponse([], "Registro atualizado com sucesso.");
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        $item = Lot::query()->findOrFail($id);
+
+        try {
+            DB::beginTransaction();
+            $item->lotSaleType()->delete();
+            $item->images()->delete();
+            $item->delete();
+
+            DB::commit();
+            return $this->sendResponse([], "Registro deletado com sucesso", 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            ds($th->getMessage());
+            return $this->sendError("Registro vinculado á outra tabela, somente poderá ser excluído se retirar o vinculo.", [], 403);
+        }
     }
 
     private function rules(Request $request, $primaryKey = null, bool $changeMessages = false)

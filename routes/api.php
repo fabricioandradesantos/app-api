@@ -29,7 +29,7 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('users', App\Http\Controllers\API\UserController::class)->only(['update']);
             Route::post('change-password', App\Http\Controllers\API\ChangePasswordController::class);
 
-            Route::apiResource('lots', App\Http\Controllers\API\LotController::class)->only(['store', 'update']);
+            Route::apiResource('lots', App\Http\Controllers\API\LotController::class)->only(['store', 'update', 'destroy']);
         });
 
         Route::post('password/email',  App\Http\Controllers\API\ForgotPasswordController::class);
