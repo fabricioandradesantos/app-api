@@ -30,7 +30,9 @@ class Lot extends Model
         'area',
         'price',
         'type', 
-        'description'
+        'description',
+        'lat',
+        'long'
     ];
 
     /**

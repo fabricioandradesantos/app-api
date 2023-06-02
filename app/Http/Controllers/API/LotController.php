@@ -184,6 +184,8 @@ class LotController extends BaseController
             'price' => ['nullable', 'min:0', 'numeric'],
             'type' => ['nullable'],
             'description' => ['nullable', 'max:300', 'string'],
+            'lat' => ['required', 'numeric'],
+            'long' => ['required', 'numeric'],
         ];
 
         $messages = [];

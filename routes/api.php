@@ -38,7 +38,7 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::apiResource('lots', App\Http\Controllers\API\LotController::class)->only(['index', 'show']);
-
+    Route::apiResource('cities', App\Http\Controllers\API\CityController::class)->only(['index', 'show']);
 
 });
 
