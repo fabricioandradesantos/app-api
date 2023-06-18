@@ -18,6 +18,9 @@ class LotController extends BaseController
     public function index(Request $request)
     {
         $data = Lot::query()
+            ->when($request->has('city_id'), function ($query) use ($request) {
+                return $query->where('city_id', $request->city_id);
+            })
             ->with('lotSaleType.saleType')
             ->get();
 

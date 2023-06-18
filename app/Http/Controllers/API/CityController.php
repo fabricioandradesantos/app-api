@@ -11,13 +11,13 @@ class CityController extends BaseController
     public function index(Request $request)
     {
         $query = City::query()
-        ->with('state')
+            ->with('state')
             ->orderBy('title', 'asc')
-            ->when($request->has('state'), function ($query) use ($request) {
-                return $query->where('state_id', $request->state);
+            ->when($request->has('state_id'), function ($query) use ($request) {
+                return $query->where('state_id', $request->state_id);
             })
-            ->when($request->has('search'), function ($query) use ($request) {
-                return $query->where('cities.title', 'like', '%' . $request->search . '%');
+            ->when($request->has('name'), function ($query) use ($request) {
+                return $query->where('cities.title', 'like', '%' . $request->name . '%');
             });
 
         ($request->has('page'))  ? $data = $query->paginate(10) : $data = $query->get();
